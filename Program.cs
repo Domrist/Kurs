@@ -29,12 +29,12 @@ namespace Kurs
             direction = 1000;
             trackX = new List<float>();
             trackY = new List<float>();
-            trackX.Add(1);
-            trackX.Add(2);
-            trackX.Add(3);
-            trackY.Add(1);
-            trackY.Add(2);
-            trackY.Add(3);
+            trackX.Add(100);
+            trackX.Add(101);
+            trackX.Add(102);
+            trackY.Add(100);
+            trackY.Add(101);
+            trackY.Add(102);
 
         }
         
@@ -123,7 +123,7 @@ namespace Kurs
 	   public string [] massOfWal;
        public RectangleShape [] sqarPosition;
        public int address;
-       public Wall(int x)
+       public Wall(int x) // С КАРТОЙ ПИЗДЕЦ,СРОЧНО ПЕРЕДЕЛАЙ ЭТОТ ТАСК
        {
             address = 0;
            sqarPosition = new RectangleShape[174];
@@ -329,19 +329,18 @@ namespace Kurs
         public Wolf()
         {
             step = 0;
-            img = new Image("wolf.png"); //Поставить другое изображение волка
+            img = new Image("wolf.png");
             txt = new Texture(img, new IntRect(0, 0, 1000, 1000));
             sprt = new Sprite(txt);
             sprt.Scale = new Vector2f((float)0.03, (float)0.03);
-            sprt.Position = new Vector2f(1, 1);
+            sprt.Position = new Vector2f(30, 30);
 
         }
         public void update(Hero b,RenderWindow win)
         {
 
-        	Console.WriteLine(sprt.Position.X);
-            int bufferX = b.trackX.Count - (b.trackX.Count - step);
-            int bufferY = b.trackY.Count - (b.trackY.Count - step);
+            int bufferX = b.trackX.Count - (b.trackX.Count - step); // step;
+            int bufferY =b.trackY.Count - (b.trackY.Count - step); //step; -- НУ ХУЙ ЗНАЕТ,НАДО ПЕРЕПРОБОВАТЬ НА ВИНДЕ ТАКЖЕ
             if(bufferX < b.trackX.Count && bufferY < b.trackY.Count)
             {
                 float xB = b.trackX[bufferX];
@@ -375,12 +374,9 @@ namespace Kurs
     	public int points;
         public Carrot(Wall w) 
         {
-        	f = new Font("font.ttf");
-    		pointsStr = new Text(points.ToString(),f);
-    		pointsStr.Position = new Vector2f(0,200);
-    		pointsStr.FillColor = Color.Red;
-    		pointsStr.CharacterSize = 40;
     		points = 0;
+        	f = new Font("font.ttf");
+        	pointsStr = new Text(points.ToString(),f);
             adrs = 0;
             Image img = new Image("carrot.png");
             Texture txt = new Texture(img);
@@ -438,7 +434,9 @@ namespace Kurs
         public void updatePoints(RenderWindow win)
         {
         	pointsStr = new Text(points.ToString(),f);
-        	pointsStr.Position = new Vector2f(0,200);
+        	pointsStr.Position = new Vector2f(0,180);
+    		pointsStr.FillColor = Color.Red;
+
         	win.Draw(pointsStr);
         }
     }
@@ -474,20 +472,16 @@ class Program
             window.SetMouseCursorVisible(false);
 
             Points pp = new Points();
-            wolf.sprt.Position = new Vector2f(1000,100);
             while(window.IsOpen)
             {
                 t = c.ElapsedTime;
-                window.DispatchEvents();
-                
-                
+                window.DispatchEvents();                
                 window.Clear();
                 car.update(window,h);
                 w.draw(window);
-
-                wolf.update(h,window);
                 h.update(window,w);
                 bird.update(window,h,t,c);
+                wolf.update(h,window);
                 window.Draw(pp.t); //рисуем текст
                 car.updatePoints(window);
                 window.Display();
