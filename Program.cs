@@ -160,7 +160,7 @@ namespace Kurs
                 {
                     if(massOfWal[i].ToCharArray()[j] == '1')
                     {     
-                        sqarPosition[address].Position = new Vector2f((float)j* 30,(float)i * 30);
+                        sqarPosition[address].Position = new Vector2f(j* 30,(float)i * 30);
                         address++;
                     }
                 }
@@ -241,7 +241,7 @@ namespace Kurs
             catchY = 0;
             currentX = 0;
             currentY = 0;
-            img = new Image("eagle.png"); //Поставить другое изображение орла
+            img = new Image("eagle.png");
             txt = new Texture(img);
             sprt = new Sprite(txt);
             sprt.Scale = new Vector2f((float)0.03, (float)0.03);
@@ -339,6 +339,7 @@ namespace Kurs
         public void update(Hero b,RenderWindow win)
         {
 
+        	Console.WriteLine(sprt.Position.X);
             int bufferX = b.trackX.Count - (b.trackX.Count - step);
             int bufferY = b.trackY.Count - (b.trackY.Count - step);
             if(bufferX < b.trackX.Count && bufferY < b.trackY.Count)
@@ -350,10 +351,12 @@ namespace Kurs
                 {
                     step++;
                 }
+                /*
                 if(sprt.GetGlobalBounds().Intersects(b.sprt.GetGlobalBounds()))
                 {
                     win.Close(); /////////////////////////////////////////fix
                 }
+                */
             }
             win.Draw(sprt);
         }
@@ -361,13 +364,23 @@ namespace Kurs
 
     public class Carrot
     {
+
         public Sprite sprt;
         public Image img;
         public Texture txt;
+        public Font f;
         public int adrs;
         public List<Sprite> car;
+        public Text pointsStr;
+    	public int points;
         public Carrot(Wall w) 
         {
+        	f = new Font("font.ttf");
+    		pointsStr = new Text(points.ToString(),f);
+    		pointsStr.Position = new Vector2f(0,200);
+    		pointsStr.FillColor = Color.Red;
+    		pointsStr.CharacterSize = 40;
+    		points = 0;
             adrs = 0;
             Image img = new Image("carrot.png");
             Texture txt = new Texture(img);
@@ -416,12 +429,33 @@ namespace Kurs
             {
                 if(car[i].GetGlobalBounds().Intersects(h.sprt.GetGlobalBounds()))
                 {
+                	points++;
                     car.Remove(car[i]);
                 }
             }
             draw(win);
         }
-        
+        public void updatePoints(RenderWindow win)
+        {
+        	pointsStr = new Text(points.ToString(),f);
+        	pointsStr.Position = new Vector2f(0,200);
+        	win.Draw(pointsStr);
+        }
+    }
+
+    public class Points
+    {
+    	public Text t;
+    	public Font f;
+	
+    	public Points()
+    	{
+    		f = new Font("font.ttf");
+    		t = new Text("Points : ",f);
+    		t.Position = new Vector2f(0,150);
+    		t.FillColor = Color.Red;
+    		t.CharacterSize = 18;
+    	}
     }
 
 class Program
@@ -439,7 +473,8 @@ class Program
             window.SetVerticalSyncEnabled(true);
             window.SetMouseCursorVisible(false);
 
-            wolf.sprt.Position = new Vector2f(100,100);
+            Points pp = new Points();
+            wolf.sprt.Position = new Vector2f(1000,100);
             while(window.IsOpen)
             {
                 t = c.ElapsedTime;
@@ -453,6 +488,8 @@ class Program
                 wolf.update(h,window);
                 h.update(window,w);
                 bird.update(window,h,t,c);
+                window.Draw(pp.t); //рисуем текст
+                car.updatePoints(window);
                 window.Display();
             }
         }
