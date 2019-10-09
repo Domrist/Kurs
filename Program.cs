@@ -146,7 +146,8 @@ namespace Kurs
         						 "00100000000010000",
         						 "10101011111010101", 
         						 "00001000100000100", 
-        						 "01111110101111110"};
+        						 "01111110101111110",
+                                 "00000000000000000"};
             for(int i = 0;i < 174;i++)
             {
                 sqarPosition[i] = new RectangleShape(new Vector2f(30,30));
@@ -349,6 +350,10 @@ namespace Kurs
                 {
                     step++;
                 }
+                if(sprt.GetGlobalBounds().Intersects(b.sprt.GetGlobalBounds()))
+                {
+                    win.Close(); /////////////////////////////////////////fix
+                }
             }
             win.Draw(sprt);
         }
@@ -359,18 +364,64 @@ namespace Kurs
         public Sprite sprt;
         public Image img;
         public Texture txt;
+        public int adrs;
         public List<Sprite> car;
         public Carrot(Wall w) 
         {
+            adrs = 0;
             Image img = new Image("carrot.png");
             Texture txt = new Texture(img);
             Sprite sprt = new Sprite(txt);
-            car = new List<Sprite>();
-            for(int i =0;i < 173;i++)
+            car = new List<Sprite>(190);
+            
+            for(int i = 0;i < w.massOfWal.Length;i++)
             {
-                
+                for(int j = 0;j < w.massOfWal[i].ToCharArray().Length;j++)
+                {
+                    if(w.massOfWal[i].ToCharArray()[j] == '0')
+                    {
+                        car.Add(new Sprite(txt));
+                        car[adrs].Scale = new Vector2f((float)0.025,(float)0.025); 
+                        adrs++;
+                    }
+                }
+            }
+            adrs = 0;
+            for(int i = 0;i < w.massOfWal.Length;i++)
+            {
+                for(int j = 0;j < w.massOfWal[i].ToCharArray().Length;j++)
+                {
+                    if(w.massOfWal[i].ToCharArray()[j] == '0')
+                    {
+                        car[adrs].Position = new Vector2f((j * 30) + 10,(i * 30) + 10); 
+                        adrs++;
+                    }
+                }
+            }
+            adrs = 0;
+        }
+        
+        public void draw(RenderWindow w)
+        {
+            //173
+            for(int i = 0;i < car.Count;i++)
+            {
+                w.Draw(car[i]);
+                //Console.WriteLine(car[i].Position.X);
             }
         }
+        public void update(RenderWindow win,Hero h)
+        {
+            for(int i = 0;i < car.Count;i++)
+            {
+                if(car[i].GetGlobalBounds().Intersects(h.sprt.GetGlobalBounds()))
+                {
+                    car.Remove(car[i]);
+                }
+            }
+            draw(win);
+        }
+        
     }
 
 class Program
@@ -384,16 +435,22 @@ class Program
             Eagle bird = new Eagle();
             Time t = new Time();
             Clock c = new Clock();
+            Carrot car = new Carrot(w);
             window.SetVerticalSyncEnabled(true);
+            window.SetMouseCursorVisible(false);
+
             wolf.sprt.Position = new Vector2f(100,100);
             while(window.IsOpen)
             {
                 t = c.ElapsedTime;
-                Console.WriteLine(t.AsSeconds());
                 window.DispatchEvents();
+                
+                
                 window.Clear();
-                wolf.update(h,window);
+                car.update(window,h);
                 w.draw(window);
+
+                wolf.update(h,window);
                 h.update(window,w);
                 bird.update(window,h,t,c);
                 window.Display();
