@@ -1,4 +1,4 @@
-	using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,8 +6,8 @@ using SFML;
 using SFML.System;
 using SFML.Graphics;
 using SFML.Window;
-//количество морковок = 173
-//коршун,лиса,медведь
+//////////////////////////////////ТАСК - СДЕЛАТЬ МЕХАНИЗМ ОСТАНОВКИ ВСЕХ СПРАЙТОВ КАСАЮТСЯ КРОЛИКА
+//лиса,медведь
 namespace Kurs
 {
     public class Hero
@@ -22,7 +22,6 @@ namespace Kurs
         {
             img = new Image("rabbit.png");
             txt = new Texture(img);
-
             sprt = new Sprite(txt);
             sprt.Scale = new Vector2f((float)0.03, (float)0.03);
             sprt.Position = new Vector2f(250, 250);
@@ -35,12 +34,10 @@ namespace Kurs
             trackY.Add(100);
             trackY.Add(101);
             trackY.Add(102);
-
         }
         
         public void update(RenderWindow w,Wall wal)
         {
-
             trackX.Add(sprt.Position.X);
             trackY.Add(sprt.Position.Y);
 
@@ -114,7 +111,6 @@ namespace Kurs
                         sprt.Position = new Vector2f(sprt.Position.X + 1, sprt.Position.Y );
                     }
                 }
-                w.Draw(sprt);
             }
         }
     }
@@ -123,12 +119,12 @@ namespace Kurs
 	   public string [] massOfWal;
        public RectangleShape [] sqarPosition;
        public int address;
-       public Wall(int x) // С КАРТОЙ ПИЗДЕЦ,СРОЧНО ПЕРЕДЕЛАЙ ЭТОТ ТАСК //ХУЙНЯ СО 150-ЫМ ЭЛЕМЕНТОВ
+       public Wall(int x)
        {
            address = 0;
            sqarPosition = new RectangleShape[150];
 	       massOfWal = new string []{
-                                 "00000000100000000", //1
+                                 "00000000100000000",
         						 "01101110101110110",
         						 "00000000000000000", 
         						 "01101011111010110",
@@ -165,11 +161,9 @@ namespace Kurs
                     }
                 }
             }
-            Console.WriteLine(address);   
         }
-        public void draw(RenderWindow win)
+        public void update(RenderWindow win)
         {
-            
             for(int i = 0;i < 150;i++)
             {
                 win.Draw(sqarPosition[i]);
@@ -181,6 +175,7 @@ namespace Kurs
         public Sprite sprt;
         public Image img;
         public Texture txt;
+        public static bool stay;
         public virtual bool goTo(float x, float y)
         {
             float currentX = sprt.Position.X;
@@ -318,11 +313,7 @@ namespace Kurs
                 }
 
             }
-            
-                        
-            win.Draw(sprt);
         }
-        
     }
     public class Wolf : Beast
     {
@@ -358,7 +349,6 @@ namespace Kurs
                 }
                 */
             }
-            win.Draw(sprt);
         }
     }
 
@@ -396,6 +386,7 @@ namespace Kurs
                     }
                 }
             }
+            Console.WriteLine(adrs);
             adrs = 0;
             for(int i = 0;i < w.massOfWal.Length;i++)
             {
@@ -410,17 +401,14 @@ namespace Kurs
             }
             adrs = 0;
         }
-        
         public void draw(RenderWindow w)
         {
-            //173
             for(int i = 0;i < car.Count;i++)
             {
                 w.Draw(car[i]);
-                //Console.WriteLine(car[i].Position.X);
             }
         }
-        public void update(RenderWindow win,Hero h)
+        public void update(RenderWindow win,Hero h) //ПЕРЕКИНУТЬ ЭТОТ МЕОТД ВО ВНУТРЬ ФЛАГА 1
         {
             for(int i = 0;i < car.Count;i++)
             {
@@ -430,15 +418,11 @@ namespace Kurs
                     car.Remove(car[i]);
                 }
             }
-            draw(win);
-        }
-        public void updatePoints(RenderWindow win)
-        {
         	pointsStr = new Text(points.ToString(),f);
         	pointsStr.Position = new Vector2f(0,180);
     		pointsStr.FillColor = Color.Red;
-
-        	win.Draw(pointsStr);
+            draw(win);
+            win.Draw(pointsStr);
         }
     }
 
@@ -455,8 +439,69 @@ namespace Kurs
     		t.FillColor = Color.Red;
     		t.CharacterSize = 18;
     	}
+    	public void update(RenderWindow win)
+    	{
+    		win.Draw(t);
+    	}
     }
-
+    public class Creatures
+    {
+    	public Beast [] beast;
+    	public Creatures()
+    	{
+    	}
+    	public bool check(Hero h,Beast b,Beast bb) //проверка,поймали ли зайчика
+    	{
+    		bool q = false;
+    		for(int i = 0;i < beast.Length;i++)
+    		{
+    			if(b.sprt.GetGlobalBounds().Intersects(h.sprt.GetGlobalBounds()) || bb.sprt.GetGlobalBounds().Intersects(h.sprt.GetGlobalBounds()))
+    			{
+    				Console.WriteLine("TOUCH");
+    				q =  true;
+    			}
+    			else
+    			{
+    				q = false;
+    			}
+    		}
+    		return q;
+    	}
+	    public void updateAll(RenderWindow win,Hero h,Eagle e,Wolf w,Wall wal,Carrot car,Time t,Clock c,Points p)
+	    {
+	    	wal.update(win);
+	    	p.update(win);
+		    car.update(win,h);
+	    	if(check(h,w,e))
+	    	{
+	    		Beast.stay = true;
+	    	}
+	    	if(!check(h,w,e))
+	    	{
+	    		Beast.stay = false;
+	    	}
+	    	if(Beast.stay == false)
+	    	{
+		    	h.update(win,wal);
+		    	e.update(win,h,t,c);
+		    	w.update(h,win);
+	    	}
+	    	else
+	    	{
+	    		h.sprt.Position = new Vector2f(h.sprt.Position.X,h.sprt.Position.Y);
+	    		e.sprt.Position = new Vector2f(e.sprt.Position.X,e.sprt.Position.Y);
+	    		w.sprt.Position = new Vector2f(w.sprt.Position.X,w.sprt.Position.Y);
+	    	}
+		    
+	    }
+	    public void drawAll(RenderWindow win,Hero h,Eagle e,Wolf w)
+	    {
+	    	win.Draw(h.sprt);	
+	    	win.Draw(w.sprt);	
+	    	win.Draw(e.sprt);	
+	    }	
+    }
+    
 class Program
 {
         static void Main(string[] args)
@@ -471,24 +516,23 @@ class Program
             Carrot car = new Carrot(w);
             window.SetVerticalSyncEnabled(true);
             window.SetMouseCursorVisible(false);
-            for(int i = 0;i < w.sqarPosition.Length;i++)
-            {
-                Console.WriteLine(i + "\t" + w.sqarPosition[i].Position.X + "\t" + w.sqarPosition[i].Position.Y);
-            }
             Points pp = new Points();
+            Creatures creatures = new Creatures();
+            Beast.stay = false;
             while(window.IsOpen)
             {
                 t = c.ElapsedTime;
                 window.DispatchEvents(); 
                 window.Clear();
-                window.Draw(w.sqarPosition[149]);
-                car.update(window,h);
-                w.draw(window);
-                h.update(window,w);
-                bird.update(window,h,t,c);
-                wolf.update(h,window);
-                window.Draw(pp.t); //рисуем текст
-                car.updatePoints(window);
+                if(car.points < 190 )
+                {
+	                creatures.updateAll(window,h,bird,wolf,w,car,t,c,pp);
+                }
+                else
+                {
+                	window.Close();
+                }
+                creatures.drawAll(window,h,bird,wolf);// ВОТ ЗДЕСЬ ДОЛДНА БЫТЬ ВСЯ ОТРИСОВКА ПЕРСОНАЖЕЙ
                 window.Display();
             }
         }
