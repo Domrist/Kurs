@@ -1,4 +1,4 @@
-using System;
+	using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -123,12 +123,12 @@ namespace Kurs
 	   public string [] massOfWal;
        public RectangleShape [] sqarPosition;
        public int address;
-       public Wall(int x) // С КАРТОЙ ПИЗДЕЦ,СРОЧНО ПЕРЕДЕЛАЙ ЭТОТ ТАСК
+       public Wall(int x) // С КАРТОЙ ПИЗДЕЦ,СРОЧНО ПЕРЕДЕЛАЙ ЭТОТ ТАСК //ХУЙНЯ СО 150-ЫМ ЭЛЕМЕНТОВ
        {
-            address = 0;
-           sqarPosition = new RectangleShape[174];
+           address = 0;
+           sqarPosition = new RectangleShape[150];
 	       massOfWal = new string []{
-                                 "00000000100000000",
+                                 "00000000100000000", //1
         						 "01101110101110110",
         						 "00000000000000000", 
         						 "01101011111010110",
@@ -148,7 +148,7 @@ namespace Kurs
         						 "00001000100000100", 
         						 "01111110101111110",
                                  "00000000000000000"};
-            for(int i = 0;i < 174;i++)
+            for(int i = 0;i < 150;i++)
             {
                 sqarPosition[i] = new RectangleShape(new Vector2f(30,30));
                 sqarPosition[i].FillColor = Color.Green;
@@ -164,12 +164,13 @@ namespace Kurs
                         address++;
                     }
                 }
-            } 
+            }
+            Console.WriteLine(address);   
         }
         public void draw(RenderWindow win)
         {
             
-            for(int i = 0;i < sqarPosition.Length;i++)
+            for(int i = 0;i < 150;i++)
             {
                 win.Draw(sqarPosition[i]);
             }
@@ -374,7 +375,7 @@ namespace Kurs
     	public int points;
         public Carrot(Wall w) 
         {
-    		points = 0;
+			points = 0;
         	f = new Font("font.ttf");
         	pointsStr = new Text(points.ToString(),f);
             adrs = 0;
@@ -470,13 +471,17 @@ class Program
             Carrot car = new Carrot(w);
             window.SetVerticalSyncEnabled(true);
             window.SetMouseCursorVisible(false);
-
+            for(int i = 0;i < w.sqarPosition.Length;i++)
+            {
+                Console.WriteLine(i + "\t" + w.sqarPosition[i].Position.X + "\t" + w.sqarPosition[i].Position.Y);
+            }
             Points pp = new Points();
             while(window.IsOpen)
             {
                 t = c.ElapsedTime;
-                window.DispatchEvents();                
+                window.DispatchEvents(); 
                 window.Clear();
+                window.Draw(w.sqarPosition[149]);
                 car.update(window,h);
                 w.draw(window);
                 h.update(window,w);
