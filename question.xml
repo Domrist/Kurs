@@ -1,0 +1,42 @@
+<?xml version = "1.0" encoding = "utf-8" ?>
+<questions>
+	<question id = "1" isAnswered = "no">
+		<text>
+			Who lives in forest?
+		</text>
+		<rightQuestion>Fox</rightQuestion>
+		<answer1>Fox</answer1>
+		<answer2>Car</answer2>
+		<answer3>House</answer3>
+	</question>
+
+	<question id = "2" isAnswered = "no">
+		<text>Who eat carrot?</text>
+		<rightQuestion>Rabbit</rightQuestion>
+		<answer1>Bear</answer1>
+		<answer2>Air</answer2>
+		<answer3>Rabbit</answer3>
+	</question>
+
+	<question id = "3" isAnswered = "no">
+		<text>Who?</text>
+		<rightQuestion>Me</rightQuestion>
+		<answer1>You</answer1>
+		<answer2>Me</answer2>
+		<answer3>We</answer3>
+	</question>
+	<question id = "4" isAnswered = "no">
+		<text>Postavite mne avtomat?</text>
+		<rightQuestion>Da</rightQuestion>
+		<answer1>Ok</answer1>
+		<answer2>Maybe</answer2>
+		<answer3>Da</answer3>
+	</question>
+	<question id = "5" isAnswered = "no">
+		<text>Mozhno ya ne budu delat' 4ertov wpf :3 ?</text>
+		<rightQuestion>Ladno</rightQuestion>
+		<answer1>Da</answer1>
+		<answer2>Ladno</answer2>
+		<answer3>Horosho</answer3>
+	</question>
+</questions>

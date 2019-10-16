@@ -6,8 +6,8 @@ using SFML;
 using SFML.System;
 using SFML.Graphics;
 using SFML.Window;
-//////////////////////////////////ТАСК - СДЕЛАТЬ МЕХАНИЗМ ОСТАНОВКИ ВСЕХ СПРАЙТОВ КАСАЮТСЯ КРОЛИКА
-//лиса,медведь
+using System.Xml;
+
 namespace Kurs
 {
     public class Hero
@@ -18,8 +18,10 @@ namespace Kurs
         public List<float> trackX;
         public List<float> trackY;
         public int direction;
+        public int life;
         public Hero()
         {
+        	life = 3;
             img = new Image("rabbit.png");
             txt = new Texture(img);
             sprt = new Sprite(txt);
@@ -311,7 +313,6 @@ namespace Kurs
                         }    
                     }
                 }
-
             }
         }
     }
@@ -331,8 +332,8 @@ namespace Kurs
         public void update(Hero b,RenderWindow win)
         {
 
-            int bufferX = b.trackX.Count - (b.trackX.Count - step); // step;
-            int bufferY =b.trackY.Count - (b.trackY.Count - step); //step; -- НУ ХУЙ ЗНАЕТ,НАДО ПЕРЕПРОБОВАТЬ НА ВИНДЕ ТАКЖЕ
+            int bufferX = b.trackX.Count - (b.trackX.Count - step);
+            int bufferY =b.trackY.Count - (b.trackY.Count - step);
             if(bufferX < b.trackX.Count && bufferY < b.trackY.Count)
             {
                 float xB = b.trackX[bufferX];
@@ -342,19 +343,12 @@ namespace Kurs
                 {
                     step++;
                 }
-                /*
-                if(sprt.GetGlobalBounds().Intersects(b.sprt.GetGlobalBounds()))
-                {
-                    win.Close(); /////////////////////////////////////////fix
-                }
-                */
             }
         }
     }
 
     public class Carrot
     {
-
         public Sprite sprt;
         public Image img;
         public Texture txt;
@@ -386,7 +380,6 @@ namespace Kurs
                     }
                 }
             }
-            Console.WriteLine(adrs);
             adrs = 0;
             for(int i = 0;i < w.massOfWal.Length;i++)
             {
@@ -408,7 +401,7 @@ namespace Kurs
                 w.Draw(car[i]);
             }
         }
-        public void update(RenderWindow win,Hero h) //ПЕРЕКИНУТЬ ЭТОТ МЕОТД ВО ВНУТРЬ ФЛАГА 1
+        public void update(RenderWindow win,Hero h) 
         {
             for(int i = 0;i < car.Count;i++)
             {
@@ -430,7 +423,6 @@ namespace Kurs
     {
     	public Text t;
     	public Font f;
-	
     	public Points()
     	{
     		f = new Font("font.ttf");
@@ -444,62 +436,242 @@ namespace Kurs
     		win.Draw(t);
     	}
     }
+    public class AnswersAndQuestions //////////////////////////ПОКАЗАТЬ АКСЁНОВОЙ И СПРРОСИТЬ ПРО ИЗМЕНЕНИЕ АТРИБУТОВ XML
+    {
+    	public	Font f;
+    	public	Text question;
+    	public	Text answer1;
+    	public	Text answer2;
+    	public	Text answer3;
+    	public XmlDocument doc;
+    	public XmlElement root;
+    	public Text rightQuestion;
+    	public string finalAnswer;
+    	public Text [] mas;
+        public Random rnd;
+        public string questionID;
+        public bool lockQuestion;
+        public int randId;
+    	public AnswersAndQuestions()
+    	{
+    		finalAnswer = new string("");
+    		f = new Font("font.ttf");
+    		question = new Text("",f); 
+    		answer1 = new Text("",f); 
+    		answer2 = new Text("",f);
+    		answer3 = new Text("",f);
+            question.FillColor = Color.Green;
+    		rightQuestion = new Text("",f);
+            answer1.FillColor = Color.Red;
+            answer2.FillColor = Color.Red;
+            answer3.FillColor = Color.Red;
+            rnd = new Random();
+    		doc = new XmlDocument();
+    		doc.Load("question.xml");
+    		root = doc.DocumentElement;
+    		mas = new Text[3]{answer1,answer2,answer3};
+    		lockQuestion = false;
+    	}
+    	public void showQuestion(RenderWindow win)
+    	{
+    		win.Draw(question);
+    		win.Draw(answer1);
+    		win.Draw(answer2);
+    		win.Draw(answer3);
+    	}
+    	public void setQuestion()
+    	{
+    		if(!lockQuestion)
+    		{
+            	randId = rnd.Next(1,5); //что то недао сделать с программой
+            	lockQuestion = true;
+            	questionID = randId.ToString();
+    		}
+    		else
+    		{
+
+    		}
+    		foreach(XmlNode node in root.ChildNodes) //перебираем весь файл на отдельные ноды
+    		{
+
+                /*Цикл ниже - перебираем отдельный узел,на которые не ответили*/
+                
+                if(node.Attributes.GetNamedItem("isAnswered").Value == "no" && 
+                   node.Attributes.GetNamedItem("id").Value == randId.ToString())
+                {
+	                foreach(XmlNode i in node)
+	                {
+	                	if(i.Name == "text")
+	                    {
+	                    	question.DisplayedString = i.InnerText;
+	                    }
+	                    if(i.Name == "rightQuestion")
+	                    {
+	                    	finalAnswer = i.InnerText.ToString();
+	                    }
+	                    if(i.Name == "answer1")
+	                    {
+	                        answer1.DisplayedString = i.InnerText;
+	                    }
+	                    if(i.Name == "answer2")
+	                    {
+	                        answer2.DisplayedString = i.InnerText;
+	                    }
+	                    if(i.Name == "answer3")
+	                    {
+	                        answer3.DisplayedString = i.InnerText;
+	                    }
+
+	                }
+	                question.Position = new Vector2f(255 - question.GetGlobalBounds().Width/2,0);
+	                answer1.Position = new Vector2f(510/4 - answer1.GetGlobalBounds().Width/2,100);
+	                answer2.Position = new Vector2f(510/4*2 - answer2.GetGlobalBounds().Width/2,100);
+	                answer3.Position = new Vector2f(510/4*3 - answer3.GetGlobalBounds().Width/2,100);
+                    break;
+	            }
+                
+    		} 
+    	}
+        
+    	public bool checkQuestion(RenderWindow win,Hero h,Wolf w,Eagle e)
+    	{
+    		foreach(Text button in mas)
+    		{
+	    		if(Mouse.GetPosition(win).X >= button.Position.X &&
+	    		   Mouse.GetPosition(win).X <= button.GetGlobalBounds().Width + button.Position.X &&
+	    		   Mouse.GetPosition(win).Y <= button.Position.Y + button.GetGlobalBounds().Height + 20 &&
+	    		   Mouse.GetPosition(win).Y >= button.Position.Y )
+	    		{
+	    			button.FillColor = Color.Green;
+	    			if(Mouse.IsButtonPressed(Mouse.Button.Left))	
+	    			{
+		    			if(button.DisplayedString == finalAnswer)
+	    				{
+                            w.sprt.Position = new Vector2f(0,0);
+                            e.sprt.Position = new Vector2f(e.currentX,e.currentY);
+                            Beast.stay = false;
+                            lockQuestion = true;
+	    					return true;
+	    				}
+	    				else if(button.DisplayedString != finalAnswer) 
+	    				{
+	    					h.life -= 1;
+                            w.sprt.Position = new Vector2f(0,0);
+                            e.sprt.Position = new Vector2f(300,300);  //////////////////////////ПОФИКСИТЬ ПОЛОЖЕНИЕ ОРЛА ПОСЛЕ СБРОСА ВОПРОСА
+                            lockQuestion = true;
+                            Beast.stay = false;
+	    					return false;
+	    				}
+	    			}
+	    			else
+	    			{
+	    			}
+	    		}		
+	    		else
+	    		{
+	    			button.FillColor = Color.Red;
+	    		}
+	    	}
+	    	return false;
+    	}
+    }
     public class Creatures
     {
-    	public Beast [] beast;
     	public Creatures()
     	{
     	}
     	public bool check(Hero h,Beast b,Beast bb) //проверка,поймали ли зайчика
     	{
     		bool q = false;
-    		for(int i = 0;i < beast.Length;i++)
-    		{
-    			if(b.sprt.GetGlobalBounds().Intersects(h.sprt.GetGlobalBounds()) || bb.sprt.GetGlobalBounds().Intersects(h.sprt.GetGlobalBounds()))
-    			{
-    				Console.WriteLine("TOUCH");
-    				q =  true;
-    			}
-    			else
-    			{
-    				q = false;
-    			}
-    		}
+    		
+			if(b.sprt.GetGlobalBounds().Intersects(h.sprt.GetGlobalBounds()) || bb.sprt.GetGlobalBounds().Intersects(h.sprt.GetGlobalBounds()))
+			{
+				q =  true;
+			}
+			else
+			{
+				q = false;
+			}
+    		
     		return q;
     	}
-	    public void updateAll(RenderWindow win,Hero h,Eagle e,Wolf w,Wall wal,Carrot car,Time t,Clock c,Points p)
-	    {
-	    	wal.update(win);
-	    	p.update(win);
-		    car.update(win,h);
-	    	if(check(h,w,e))
-	    	{
-	    		Beast.stay = true;
-	    	}
-	    	if(!check(h,w,e))
-	    	{
-	    		Beast.stay = false;
-	    	}
-	    	if(Beast.stay == false)
-	    	{
-		    	h.update(win,wal);
-		    	e.update(win,h,t,c);
-		    	w.update(h,win);
-	    	}
-	    	else
-	    	{
-	    		h.sprt.Position = new Vector2f(h.sprt.Position.X,h.sprt.Position.Y);
-	    		e.sprt.Position = new Vector2f(e.sprt.Position.X,e.sprt.Position.Y);
-	    		w.sprt.Position = new Vector2f(w.sprt.Position.X,w.sprt.Position.Y);
-	    	}
-		    
-	    }
 	    public void drawAll(RenderWindow win,Hero h,Eagle e,Wolf w)
 	    {
 	    	win.Draw(h.sprt);	
 	    	win.Draw(w.sprt);	
 	    	win.Draw(e.sprt);	
 	    }	
+	    public void updateAll(RenderWindow win,Hero h,Eagle e,Wolf w,Wall wal,Carrot car,Time t,Clock c,Points p,
+	    					  AnswersAndQuestions quest)
+	    {
+	    	if(check(h,w,e))
+	    	{
+	    		Beast.stay = true;
+	    		quest.setQuestion();
+	    	}
+	    	if(!check(h,w,e))
+	    	{
+	    		Beast.stay = false;
+	    	}
+	    	if(Beast.stay == false) //если зайца не поймали,то тогда рисуем всё
+	    	{
+		    	wal.update(win);
+		    	p.update(win);
+			    car.update(win,h);
+		    	h.update(win,wal);
+		    	e.update(win,h,t,c);
+		    	w.update(h,win);
+		    	drawAll(win,h,e,w);
+	    	}
+	    	else //если зайца поймали то тогда ничего не рисуем и останавливаем всех персонажей 
+	    	{
+	    		h.sprt.Position = new Vector2f(h.sprt.Position.X,h.sprt.Position.Y);
+	    		e.sprt.Position = new Vector2f(e.sprt.Position.X,e.sprt.Position.Y);
+	    		w.sprt.Position = new Vector2f(w.sprt.Position.X,w.sprt.Position.Y);
+	    		quest.showQuestion(win);
+	    		quest.checkQuestion(win,h,w,e);
+	    	}
+		    
+	    }
+    }
+    public class Over
+    {
+    	public Font f;
+    	public Text gameOverText;
+		public Text gameOverGoodText;
+		public Over()
+		{
+    		f = new Font("font.ttf");
+    		gameOverText = new Text("Game Over :..(",f);
+    		gameOverGoodText = new Text("You Win :)",f);
+    		gameOverGoodText.FillColor = Color.Red;
+    		gameOverText.FillColor = Color.Red;
+    		gameOverText.Position = new Vector2f(100,300);
+			gameOverGoodText.Position = new Vector2f(100,300);
+		}
+    	public void GameOver(ref RenderWindow win,ref Time t)
+    	{
+    		if((int)t.AsSeconds() > 5)
+    		{
+    			win.Close();
+    		}
+    		else
+    		{
+    			win.Draw(gameOverText);
+    		}
+    	}
+    	public void GameGood(ref RenderWindow win,ref Time t)
+    	{
+    		if((int)t.AsSeconds() > 5)
+    		{
+    			win.Close();
+    		}
+    		else
+    		{
+    			win.Draw(gameOverGoodText);
+    		}
+    	}
+
     }
     
 class Program
@@ -515,24 +687,43 @@ class Program
             Clock c = new Clock();
             Carrot car = new Carrot(w);
             window.SetVerticalSyncEnabled(true);
-            window.SetMouseCursorVisible(false);
+            window.SetMouseCursorVisible(true);
             Points pp = new Points();
             Creatures creatures = new Creatures();
             Beast.stay = false;
+            AnswersAndQuestions quest = new AnswersAndQuestions();
+            bool deadAll = false;
+            Over over = new Over();
             while(window.IsOpen)
             {
+            	Console.WriteLine(h.life);
                 t = c.ElapsedTime;
                 window.DispatchEvents(); 
                 window.Clear();
-                if(car.points < 190 )
+                if(car.points < 190 && deadAll == false)
                 {
-	                creatures.updateAll(window,h,bird,wolf,w,car,t,c,pp);
+	                creatures.updateAll(window,h,bird,wolf,w,car,t,c,pp,quest);
                 }
-                else
+                if(car.points >= 190)
                 {
-                	window.Close();
+                	if(!deadAll)
+                	{
+                		c.Restart();
+                		deadAll = true;
+                	}
+                	over.GameGood(ref window,ref t);
+                	//ДОБАВИТЬ ХОРОШУЮ КОНЦОВУ
                 }
-                creatures.drawAll(window,h,bird,wolf);// ВОТ ЗДЕСЬ ДОЛДНА БЫТЬ ВСЯ ОТРИСОВКА ПЕРСОНАЖЕЙ
+                if(h.life == 0)
+                {
+                	if(!deadAll)
+                	{
+                		deadAll = true;
+                		c.Restart();
+                	}
+                	over.GameOver(ref window,ref t);
+                	//ДОБАВИТЬ ПЛОХУЮ КОНЦОВКУ
+                }
                 window.Display();
             }
         }
